@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>今日の運勢 - GPT風占い</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+        @keyframes sparkle {
+            0%, 100% { opacity: 0; transform: scale(0); }
+            50% { opacity: 1; transform: scale(1); }
+        }
+        .sparkle {
+            animation: sparkle 1.5s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-purple-100 via-pink-100 to-yellow-100 flex items-center justify-center p-4">
+    <div class="max-w-md w-full">
+        <!-- タイトル -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-purple-800 mb-2">
+                <i class="fas fa-star text-yellow-400 mr-2"></i>
+                今日の運勢
+                <i class="fas fa-star text-yellow-400 ml-2"></i>
+            </h1>
+            <p class="text-gray-600">GPT風にあなたの運勢をお届けします✨</p>
+        </div>
+
+        <!-- メインカード -->
+        <div class="bg-white rounded-3xl shadow-2xl p-8 relative overflow-hidden">
+            <!-- 装飾的な背景要素 -->
+            <div class="absolute top-0 right-0 w-32 h-32 bg-pink-200 rounded-full opacity-20 -mr-16 -mt-16"></div>
+            <div class="absolute bottom-0 left-0 w-24 h-24 bg-purple-200 rounded-full opacity-20 -ml-12 -mb-12"></div>
+            
+            <!-- 初期状態 -->
+            <div id="initial-state" class="text-center">
+                <div class="mb-6">
+                    <i class="fas fa-crystal-ball text-6xl text-purple-500"></i>
+                </div>
+                <p class="text-gray-600 mb-6">ボタンを押して今日の運勢を見てみましょう！</p>
+                <button 
+                    onclick="showFortune()" 
+                    class="bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold py-3 px-8 rounded-full hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+                >
+                    <i class="fas fa-magic mr-2"></i>
+                    運勢を見る
+                </button>
+            </div>
+
+            <!-- 結果表示エリア -->
+            <div id="result" class="hidden">
+                <!-- 運勢 -->
+                <div class="text-center mb-6 fade-in">
+                    <div class="inline-block relative">
+                        <i class="fas fa-sparkles text-yellow-400 absolute -top-2 -left-2 text-sm sparkle"></i>
+                        <i class="fas fa-sparkles text-yellow-400 absolute -bottom-2 -right-2 text-sm sparkle" style="animation-delay: 0.5s;"></i>
+                        <h2 class="text-3xl font-bold" id="fortune-text"></h2>
+                    </div>
+                </div>
+
+                <!-- ラッキーアイテム -->
+                <div class="bg-purple-50 rounded-2xl p-4 mb-4 fade-in" style="animation-delay: 0.2s;">
+                    <div class="flex items-center">
+                        <i class="fas fa-gift text-2xl text-purple-500 mr-3"></i>
+                        <div>
+                            <p class="text-sm text-gray-600">ラッキーアイテム</p>
+                            <p class="font-bold text-purple-800" id="lucky-item"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- アドバイス -->
+                <div class="bg-pink-50 rounded-2xl p-4 mb-6 fade-in" style="animation-delay: 0.4s;">
+                    <div class="flex items-start">
+                        <i class="fas fa-lightbulb text-2xl text-pink-500 mr-3 mt-1"></i>
+                        <div>
+                            <p class="text-sm text-gray-600 mb-1">今日のアドバイス</p>
+                            <p class="text-gray-800" id="advice"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- もう一度ボタン -->
+                <div class="text-center fade-in" style="animation-delay: 0.6s;">
+                    <button 
+                        onclick="showFortune()" 
+                        class="bg-gradient-to-r from-yellow-400 to-orange-400 text-white font-bold py-2 px-6 rounded-full hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+                    >
+                        <i class="fas fa-redo mr-2"></i>
+                        もう一度占う
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- フッター -->
+        <div class="text-center mt-6 text-gray-500 text-sm">
+            <p>※この占いは完全にランダムです。楽しんでくださいね！</p>
+        </div>
+    </div>
+
+    <script>
+        // 運勢のデータ
+        const fortunes = [
+            { name: '大吉', color: 'text-red-500', icon: 'fa-star' },
+            { name: '中吉', color: 'text-orange-500', icon: 'fa-sun' },
+            { name: '小吉', color: 'text-yellow-500', icon: 'fa-smile' },
+            { name: '凶', color: 'text-gray-600', icon: 'fa-cloud' },
+            { name: '超大吉', color: 'text-pink-500', icon: 'fa-crown' }
+        ];
+
+        // ラッキーアイテムのリスト
+        const luckyItems = [
+            '🍀 四つ葉のクローバー',
+            '☕ ホットコーヒー',
+            '📱 スマートフォンの充電器',
+            '🧦 片方だけの靴下',
+            '🍜 カップラーメン',
+            '✏️ 2Bの鉛筆',
+            '🎧 ワイヤレスイヤホン',
+            '🍊 みかんの皮',
+            '💳 期限切れのポイントカード',
+            '🔑 使い道不明の鍵',
+            '🍿 キャラメルポップコーン',
+            '🧸 ぬいぐるみ'
+        ];
+
+        // アドバイスのリスト
+        const advices = {
+            '大吉': [
+                '今日のあなたは無敵です！でも調子に乗って階段で転ばないように注意。',
+                'すべてがうまくいく日。ただし、賞味期限は必ず確認しましょう。',
+                'チャンスが舞い込む予感。玄関のドアはしっかり閉めておきましょう。'
+            ],
+            '中吉': [
+                '良いことが起きそう。コンビニのレジで小銭がぴったりになるかも。',
+                '平均以上の運勢。エレベーターのボタンを一発で押せるでしょう。',
+                '順調な一日。信号が青になるタイミングが絶妙です。'
+            ],
+            '小吉': [
+                'ささやかな幸せが訪れます。自販機の下に10円玉が落ちているかも。',
+                '小さな幸運が。靴紐がほどけにくい日です。',
+                'ちょっといいことがありそう。Wi-Fiの接続が安定するでしょう。'
+            ],
+            '凶': [
+                '今日は慎重に。充電ケーブルが絡まりやすい日です。',
+                '要注意の日。歯磨き粉が飛び散る可能性大。',
+                'トラブル注意。USBを3回目で正しい向きに挿せるでしょう。'
+            ],
+            '超大吉': [
+                '宇宙レベルの幸運！今すぐ宝くじを...いや、まずは朝ごはんを食べましょう。',
+                '伝説級の運勢！ただし、この運を使ってゲームのガチャを引くのはもったいない。',
+                '神がかり的な幸運！でも、明日の運勢のことは考えないようにしましょう。'
+            ]
+        };
+
+        // 運勢を表示する関数
+        function showFortune() {
+            // ランダムに運勢を選択
+            const fortune = fortunes[Math.floor(Math.random() * fortunes.length)];
+            const luckyItem = luckyItems[Math.floor(Math.random() * luckyItems.length)];
+            const adviceList = advices[fortune.name];
+            const advice = adviceList[Math.floor(Math.random() * adviceList.length)];
+
+            // 初期状態を非表示
+            document.getElementById('initial-state').classList.add('hidden');
+            
+            // 結果を表示
+            const resultDiv = document.getElementById('result');
+            resultDiv.classList.remove('hidden');
+
+            // 運勢テキストを設定
+            const fortuneText = document.getElementById('fortune-text');
+            fortuneText.innerHTML = `<i class="fas ${fortune.icon} mr-2"></i>${fortune.name}`;
+            fortuneText.className = `text-3xl font-bold ${fortune.color}`;
+
+            // ラッキーアイテムを設定
+            document.getElementById('lucky-item').textContent = luckyItem;
+
+            // アドバイスを設定
+            document.getElementById('advice').textContent = advice;
+
+            // アニメーションをリセット
+            const fadeElements = resultDiv.querySelectorAll('.fade-in');
+            fadeElements.forEach(el => {
+                el.style.animation = 'none';
+                setTimeout(() => {
+                    el.style.animation = '';
+                }, 10);
+            });
+        }
+    </script>
+</body>
+</html>
