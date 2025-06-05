@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>自己紹介カードジェネレーター</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Google Fonts - Noto Sans JP -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-pink-100 via-purple-50 to-indigo-100 min-h-screen py-8">
+    <div class="container mx-auto px-4 max-w-2xl">
+        <!-- タイトル -->
+        <h1 class="text-4xl font-bold text-center mb-8 text-purple-800 drop-shadow-sm">
+            <i class="fas fa-heart text-pink-500 mr-2"></i>
+            自己紹介カードメーカー
+            <i class="fas fa-heart text-pink-500 ml-2"></i>
+        </h1>
+
+        <!-- 入力フォーム -->
+        <div class="bg-white rounded-3xl shadow-xl p-8 mb-8">
+            <form id="cardForm" class="space-y-6">
+                <!-- 名前入力 -->
+                <div>
+                    <label class="block text-gray-700 font-semibold mb-2">
+                        <i class="fas fa-user text-purple-500 mr-2"></i>お名前
+                    </label>
+                    <input 
+                        type="text" 
+                        id="nameInput" 
+                        class="w-full px-4 py-3 border-2 border-purple-200 rounded-2xl focus:outline-none focus:border-purple-500 transition-colors"
+                        placeholder="例：山田 花子"
+                        required
+                    >
+                </div>
+
+                <!-- 趣味入力 -->
+                <div>
+                    <label class="block text-gray-700 font-semibold mb-2">
+                        <i class="fas fa-palette text-pink-500 mr-2"></i>趣味
+                    </label>
+                    <input 
+                        type="text" 
+                        id="hobbyInput" 
+                        class="w-full px-4 py-3 border-2 border-pink-200 rounded-2xl focus:outline-none focus:border-pink-500 transition-colors"
+                        placeholder="例：読書、映画鑑賞、料理"
+                        required
+                    >
+                </div>
+
+                <!-- コメント入力 -->
+                <div>
+                    <label class="block text-gray-700 font-semibold mb-2">
+                        <i class="fas fa-comment text-indigo-500 mr-2"></i>一言コメント
+                    </label>
+                    <textarea 
+                        id="commentInput" 
+                        rows="3"
+                        class="w-full px-4 py-3 border-2 border-indigo-200 rounded-2xl focus:outline-none focus:border-indigo-500 transition-colors resize-none"
+                        placeholder="例：よろしくお願いします！楽しく交流しましょう♪"
+                        required
+                    ></textarea>
+                </div>
+
+                <!-- 作成ボタン -->
+                <button 
+                    type="submit"
+                    class="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold py-4 px-6 rounded-full hover:from-purple-600 hover:to-pink-600 transform hover:scale-105 transition-all duration-200 shadow-lg"
+                >
+                    <i class="fas fa-magic mr-2"></i>カードを作成する
+                </button>
+            </form>
+        </div>
+
+        <!-- 生成されたカードの表示エリア -->
+        <div id="cardContainer" class="hidden">
+            <div id="generatedCard" class="bg-white rounded-3xl shadow-2xl overflow-hidden transform hover:scale-105 transition-transform duration-300">
+                <!-- カードヘッダー -->
+                <div class="bg-gradient-to-r from-purple-400 to-pink-400 p-6">
+                    <div class="text-center">
+                        <div class="inline-block bg-white rounded-full p-4 mb-3">
+                            <i class="fas fa-user-circle text-6xl text-purple-500"></i>
+                        </div>
+                        <h2 id="cardName" class="text-2xl font-bold text-white drop-shadow"></h2>
+                    </div>
+                </div>
+
+                <!-- カードボディ -->
+                <div class="p-6 space-y-4">
+                    <!-- 趣味セクション -->
+                    <div class="bg-pink-50 rounded-2xl p-4">
+                        <h3 class="text-lg font-semibold text-pink-700 mb-2">
+                            <i class="fas fa-heart mr-2"></i>趣味
+                        </h3>
+                        <p id="cardHobby" class="text-gray-700"></p>
+                    </div>
+
+                    <!-- コメントセクション -->
+                    <div class="bg-purple-50 rounded-2xl p-4">
+                        <h3 class="text-lg font-semibold text-purple-700 mb-2">
+                            <i class="fas fa-sparkles mr-2"></i>メッセージ
+                        </h3>
+                        <p id="cardComment" class="text-gray-700"></p>
+                    </div>
+
+                    <!-- 日付 -->
+                    <div class="text-center pt-4 border-t border-gray-200">
+                        <p class="text-sm text-gray-500">
+                            <i class="fas fa-calendar-day mr-1"></i>
+                            <span id="cardDate"></span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- もう一度作るボタン -->
+            <button 
+                onclick="resetForm()"
+                class="mt-6 mx-auto block bg-gray-500 text-white font-semibold py-3 px-6 rounded-full hover:bg-gray-600 transition-colors"
+            >
+                <i class="fas fa-redo mr-2"></i>もう一度作る
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // フォームの送信処理
+        document.getElementById('cardForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // 入力値を取得
+            const name = document.getElementById('nameInput').value;
+            const hobby = document.getElementById('hobbyInput').value;
+            const comment = document.getElementById('commentInput').value;
+            
+            // カードに値を設定
+            document.getElementById('cardName').textContent = name;
+            document.getElementById('cardHobby').textContent = hobby;
+            document.getElementById('cardComment').textContent = comment;
+            
+            // 今日の日付を設定
+            const today = new Date();
+            const dateStr = `${today.getFullYear()}年${today.getMonth() + 1}月${today.getDate()}日`;
+            document.getElementById('cardDate').textContent = dateStr;
+            
+            // フォームを非表示にしてカードを表示
+            document.getElementById('cardForm').parentElement.classList.add('hidden');
+            document.getElementById('cardContainer').classList.remove('hidden');
+            
+            // スクロールアニメーション
+            document.getElementById('cardContainer').scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'center' 
+            });
+        });
+
+        // フォームのリセット
+        function resetForm() {
+            // カードを非表示にしてフォームを表示
+            document.getElementById('cardContainer').classList.add('hidden');
+            document.getElementById('cardForm').parentElement.classList.remove('hidden');
+            
+            // フォームをクリア
+            document.getElementById('cardForm').reset();
+            
+            // フォームまでスクロール
+            document.getElementById('cardForm').scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'start' 
+            });
+        }
+    </script>
+</body>
+</html>
