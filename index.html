@@ -1,292 +1,181 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daily Fortune - Omikuji</title>
+    <title>未来寿司2035 | Future is Served</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Custom styles -->
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+JP:wght@400;700&display=swap');
+        
+        .font-orbitron {
+            font-family: 'Orbitron', sans-serif;
         }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            transition: background 0.8s ease;
-            padding: 20px;
+        
+        .neon-glow {
+            text-shadow: 0 0 10px #00d4ff, 0 0 20px #00d4ff, 0 0 30px #00d4ff;
         }
-
-        .container {
-            text-align: center;
-            width: 100%;
-            max-width: 500px;
+        
+        .neon-border {
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.5), inset 0 0 20px rgba(0, 212, 255, 0.1);
         }
-
-        .title {
-            color: white;
-            font-size: 2.5rem;
-            margin-bottom: 2rem;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-            animation: fadeIn 1s ease;
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #000428 0%, #004e92 100%);
         }
-
-        .fortune-button {
-            background: white;
-            color: #667eea;
-            border: none;
-            padding: 1.2rem 2.5rem;
-            font-size: 1.3rem;
-            font-weight: 600;
-            border-radius: 50px;
-            cursor: pointer;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        
+        .hover-glow:hover {
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.8), inset 0 0 30px rgba(0, 212, 255, 0.2);
+            transform: translateY(-2px);
             transition: all 0.3s ease;
-            outline: none;
-            margin-bottom: 2rem;
         }
-
-        .fortune-button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
-        }
-
-        .fortune-button:active {
-            transform: translateY(-1px);
-            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
-        }
-
-        .fortune-result {
-            opacity: 0;
-            transform: translateY(20px);
-            transition: all 0.6s ease;
-        }
-
-        .fortune-result.show {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .fortune-emoji {
-            font-size: 5rem;
-            margin-bottom: 1rem;
-            animation: bounce 1s ease;
-        }
-
-        .fortune-text {
-            color: white;
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 1rem;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-        }
-
-        .fortune-advice {
-            color: rgba(255,255,255,0.9);
-            font-size: 1.2rem;
-            line-height: 1.6;
-            padding: 0 20px;
-            max-width: 400px;
-            margin: 0 auto;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% {
-                transform: translateY(0);
-            }
-            40% {
-                transform: translateY(-20px);
-            }
-            60% {
-                transform: translateY(-10px);
-            }
-        }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-            20%, 40%, 60%, 80% { transform: translateX(5px); }
-        }
-
-        .shake {
-            animation: shake 0.5s ease;
-        }
-
-        /* Background colors for different fortunes */
-        body.great-luck {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-        }
-
-        body.good-luck {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-        }
-
-        body.small-luck {
-            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-        }
-
-        body.regular-luck {
-            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-        }
-
-        body.small-bad-luck {
-            background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);
-        }
-
-        body.bad-luck {
-            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
-        }
-
-        body.great-bad-luck {
-            background: linear-gradient(135deg, #8b7fc6 0%, #4e4e7f 100%);
-        }
-
-        /* Mobile responsiveness */
-        @media (max-width: 480px) {
-            .title {
-                font-size: 2rem;
-            }
-
-            .fortune-button {
-                font-size: 1.1rem;
-                padding: 1rem 2rem;
-            }
-
-            .fortune-emoji {
-                font-size: 4rem;
-            }
-
-            .fortune-text {
-                font-size: 2rem;
-            }
-
-            .fortune-advice {
-                font-size: 1rem;
-            }
+        
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background-color: #000;
+            color: #fff;
         }
     </style>
 </head>
-<body>
-    <div class="container">
-        <h1 class="title">Daily Fortune</h1>
-        <button class="fortune-button" onclick="getFortune()">Today's Fortune 🍀</button>
+<body class="bg-black text-white overflow-x-hidden">
+    
+    <!-- Hero Section -->
+    <section class="relative min-h-screen flex items-center justify-center gradient-bg">
+        <!-- Background overlay -->
+        <div class="absolute inset-0 bg-black opacity-50"></div>
         
-        <div class="fortune-result" id="fortuneResult">
-            <div class="fortune-emoji" id="fortuneEmoji"></div>
-            <div class="fortune-text" id="fortuneText"></div>
-            <div class="fortune-advice" id="fortuneAdvice"></div>
+        <!-- Background image -->
+        <div class="absolute inset-0 bg-cover bg-center opacity-30" style="background-image: url('https://images.unsplash.com/photo-1553621042-f6e147245754?w=1920&q=80');"></div>
+        
+        <!-- Content -->
+        <div class="relative z-10 text-center px-4 max-w-4xl mx-auto">
+            <h1 class="font-orbitron text-5xl md:text-7xl font-black mb-4 neon-glow text-cyan-400">
+                未来寿司2035
+            </h1>
+            <p class="font-orbitron text-xl md:text-2xl mb-2 text-cyan-300">
+                MIRAI SUSHI 2035
+            </p>
+            <p class="text-2xl md:text-4xl mb-8 font-bold">
+                未来、握ってます。
+            </p>
+            <p class="text-lg md:text-xl mb-12 text-gray-300 max-w-2xl mx-auto">
+                AI寿司職人「SUSHI-GPT」が織りなす、<br>
+                空飛ぶ商業施設「Neo Shibuya」での究極の寿司体験。<br>
+                リアルでもメタバースでも、未来の味をお届けします。
+            </p>
+            
+            <!-- Scroll indicator -->
+            <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
+                <svg class="w-6 h-6 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+                </svg>
+            </div>
         </div>
-    </div>
-
-    <script>
-        const fortunes = [
-            {
-                name: "Great Luck",
-                emoji: "🌟",
-                advice: "Amazing things are coming your way! This is the perfect time to take bold steps forward.",
-                className: "great-luck"
-            },
-            {
-                name: "Good Luck",
-                emoji: "✨",
-                advice: "Fortune smiles upon you today. Embrace opportunities that come your way.",
-                className: "good-luck"
-            },
-            {
-                name: "Small Luck",
-                emoji: "🌱",
-                advice: "Small blessings will brighten your day. Appreciate the little things.",
-                className: "small-luck"
-            },
-            {
-                name: "Regular Luck",
-                emoji: "☁️",
-                advice: "A balanced day awaits. Stay steady and trust your journey.",
-                className: "regular-luck"
-            },
-            {
-                name: "Small Bad Luck",
-                emoji: "🌧️",
-                advice: "Minor obstacles may appear, but they're just temporary clouds passing by.",
-                className: "small-bad-luck"
-            },
-            {
-                name: "Bad Luck",
-                emoji: "⛈️",
-                advice: "Challenges make us stronger. This too shall pass, stay resilient.",
-                className: "bad-luck"
-            },
-            {
-                name: "Great Bad Luck",
-                emoji: "🌪️",
-                advice: "Even in storms, remember that calm always follows. Be patient with yourself.",
-                className: "great-bad-luck"
-            }
-        ];
-
-        let lastFortuneIndex = -1;
-
-        function getFortune() {
-            const button = document.querySelector('.fortune-button');
-            const resultDiv = document.getElementById('fortuneResult');
-            const emojiDiv = document.getElementById('fortuneEmoji');
-            const textDiv = document.getElementById('fortuneText');
-            const adviceDiv = document.getElementById('fortuneAdvice');
+    </section>
+    
+    <!-- Features Section -->
+    <section class="py-20 px-4 bg-gray-900">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="font-orbitron text-3xl md:text-5xl text-center mb-16 neon-glow text-cyan-400">
+                FEATURES
+            </h2>
             
-            // Add shake animation to button
-            button.classList.add('shake');
-            setTimeout(() => button.classList.remove('shake'), 500);
-            
-            // Get random fortune (different from last one)
-            let randomIndex;
-            do {
-                randomIndex = Math.floor(Math.random() * fortunes.length);
-            } while (randomIndex === lastFortuneIndex && fortunes.length > 1);
-            
-            lastFortuneIndex = randomIndex;
-            const fortune = fortunes[randomIndex];
-            
-            // Hide result first
-            resultDiv.classList.remove('show');
-            
-            // Change background color
-            document.body.className = '';
-            setTimeout(() => {
-                document.body.classList.add(fortune.className);
-            }, 100);
-            
-            // Update fortune content
-            setTimeout(() => {
-                emojiDiv.textContent = fortune.emoji;
-                textDiv.textContent = fortune.name;
-                adviceDiv.textContent = fortune.advice;
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Feature 1 -->
+                <div class="bg-black border border-cyan-400 rounded-lg p-8 neon-border hover-glow cursor-pointer">
+                    <div class="text-cyan-400 mb-4">
+                        <svg class="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="font-orbitron text-xl mb-4 text-cyan-300">AIが握る</h3>
+                    <p class="text-gray-400">
+                        最新AI「SUSHI-GPT」が、お客様の好み・体調・気分を瞬時に分析。
+                        最適なネタと握り加減で、あなただけの一貫を創造します。
+                    </p>
+                </div>
                 
-                // Re-trigger bounce animation
-                emojiDiv.style.animation = 'none';
-                setTimeout(() => {
-                    emojiDiv.style.animation = 'bounce 1s ease';
-                }, 10);
+                <!-- Feature 2 -->
+                <div class="bg-black border border-cyan-400 rounded-lg p-8 neon-border hover-glow cursor-pointer">
+                    <div class="text-cyan-400 mb-4">
+                        <svg class="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                        </svg>
+                    </div>
+                    <h3 class="font-orbitron text-xl mb-4 text-cyan-300">空を飛ぶレストラン</h3>
+                    <p class="text-gray-400">
+                        地上1000mの「Neo Shibuya」に位置する当店。
+                        東京の夜景を眼下に、宙に浮かぶような食事体験をお楽しみください。
+                    </p>
+                </div>
                 
-                // Show result
-                resultDiv.classList.add('show');
-            }, 300);
-        }
-    </script>
+                <!-- Feature 3 -->
+                <div class="bg-black border border-cyan-400 rounded-lg p-8 neon-border hover-glow cursor-pointer">
+                    <div class="text-cyan-400 mb-4">
+                        <svg class="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="font-orbitron text-xl mb-4 text-cyan-300">アバターでも食事可能</h3>
+                    <p class="text-gray-400">
+                        メタバース完全対応。VRヘッドセットを装着すれば、
+                        世界中どこからでもアバターで来店・実食が可能です。
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- CTA Section -->
+    <section class="py-20 px-4 gradient-bg relative">
+        <div class="absolute inset-0 bg-black opacity-60"></div>
+        <div class="relative z-10 max-w-4xl mx-auto text-center">
+            <h2 class="text-3xl md:text-5xl font-bold mb-8">
+                未来の寿司体験を、今すぐ予約
+            </h2>
+            <p class="text-xl mb-12 text-gray-300">
+                2035年の味を、あなたに。
+            </p>
+            <a href="#" class="inline-block bg-cyan-400 text-black font-bold py-4 px-12 rounded-full text-lg font-orbitron hover-glow transition-all duration-300 hover:bg-cyan-300">
+                来店を予約する
+            </a>
+            <p class="mt-6 text-sm text-gray-400">
+                ※現在はコンセプトページです。実際の予約は2035年より開始予定。
+            </p>
+        </div>
+    </section>
+    
+    <!-- Footer -->
+    <footer class="bg-black border-t border-gray-800 py-8 px-4">
+        <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center">
+            <div class="mb-4 md:mb-0">
+                <p class="text-gray-400">
+                    &copy; 2035 未来寿司2035. All rights reserved from the future.
+                </p>
+            </div>
+            <div class="flex space-x-6">
+                <a href="#" class="text-gray-400 hover:text-cyan-400 transition-colors">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                    </svg>
+                </a>
+                <a href="#" class="text-gray-400 hover:text-cyan-400 transition-colors">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
+                    </svg>
+                </a>
+                <a href="#" class="text-gray-400 hover:text-cyan-400 transition-colors">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zM5.838 12a6.162 6.162 0 1112.324 0 6.162 6.162 0 01-12.324 0zM12 16a4 4 0 110-8 4 4 0 010 8zm4.965-10.405a1.44 1.44 0 112.881.001 1.44 1.44 0 01-2.881-.001z"/>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </footer>
+    
 </body>
 </html>
