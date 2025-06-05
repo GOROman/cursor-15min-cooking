@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Fortune - Omikuji</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: background 0.8s ease;
+            padding: 20px;
+        }
+
+        .container {
+            text-align: center;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .title {
+            color: white;
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            animation: fadeIn 1s ease;
+        }
+
+        .fortune-button {
+            background: white;
+            color: #667eea;
+            border: none;
+            padding: 1.2rem 2.5rem;
+            font-size: 1.3rem;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            outline: none;
+            margin-bottom: 2rem;
+        }
+
+        .fortune-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        .fortune-button:active {
+            transform: translateY(-1px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+
+        .fortune-result {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.6s ease;
+        }
+
+        .fortune-result.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .fortune-emoji {
+            font-size: 5rem;
+            margin-bottom: 1rem;
+            animation: bounce 1s ease;
+        }
+
+        .fortune-text {
+            color: white;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .fortune-advice {
+            color: rgba(255,255,255,0.9);
+            font-size: 1.2rem;
+            line-height: 1.6;
+            padding: 0 20px;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-20px);
+            }
+            60% {
+                transform: translateY(-10px);
+            }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+
+        .shake {
+            animation: shake 0.5s ease;
+        }
+
+        /* Background colors for different fortunes */
+        body.great-luck {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        body.good-luck {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        body.small-luck {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+
+        body.regular-luck {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        }
+
+        body.small-bad-luck {
+            background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);
+        }
+
+        body.bad-luck {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+        }
+
+        body.great-bad-luck {
+            background: linear-gradient(135deg, #8b7fc6 0%, #4e4e7f 100%);
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 480px) {
+            .title {
+                font-size: 2rem;
+            }
+
+            .fortune-button {
+                font-size: 1.1rem;
+                padding: 1rem 2rem;
+            }
+
+            .fortune-emoji {
+                font-size: 4rem;
+            }
+
+            .fortune-text {
+                font-size: 2rem;
+            }
+
+            .fortune-advice {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">Daily Fortune</h1>
+        <button class="fortune-button" onclick="getFortune()">Today's Fortune 🍀</button>
+        
+        <div class="fortune-result" id="fortuneResult">
+            <div class="fortune-emoji" id="fortuneEmoji"></div>
+            <div class="fortune-text" id="fortuneText"></div>
+            <div class="fortune-advice" id="fortuneAdvice"></div>
+        </div>
+    </div>
+
+    <script>
+        const fortunes = [
+            {
+                name: "Great Luck",
+                emoji: "🌟",
+                advice: "Amazing things are coming your way! This is the perfect time to take bold steps forward.",
+                className: "great-luck"
+            },
+            {
+                name: "Good Luck",
+                emoji: "✨",
+                advice: "Fortune smiles upon you today. Embrace opportunities that come your way.",
+                className: "good-luck"
+            },
+            {
+                name: "Small Luck",
+                emoji: "🌱",
+                advice: "Small blessings will brighten your day. Appreciate the little things.",
+                className: "small-luck"
+            },
+            {
+                name: "Regular Luck",
+                emoji: "☁️",
+                advice: "A balanced day awaits. Stay steady and trust your journey.",
+                className: "regular-luck"
+            },
+            {
+                name: "Small Bad Luck",
+                emoji: "🌧️",
+                advice: "Minor obstacles may appear, but they're just temporary clouds passing by.",
+                className: "small-bad-luck"
+            },
+            {
+                name: "Bad Luck",
+                emoji: "⛈️",
+                advice: "Challenges make us stronger. This too shall pass, stay resilient.",
+                className: "bad-luck"
+            },
+            {
+                name: "Great Bad Luck",
+                emoji: "🌪️",
+                advice: "Even in storms, remember that calm always follows. Be patient with yourself.",
+                className: "great-bad-luck"
+            }
+        ];
+
+        let lastFortuneIndex = -1;
+
+        function getFortune() {
+            const button = document.querySelector('.fortune-button');
+            const resultDiv = document.getElementById('fortuneResult');
+            const emojiDiv = document.getElementById('fortuneEmoji');
+            const textDiv = document.getElementById('fortuneText');
+            const adviceDiv = document.getElementById('fortuneAdvice');
+            
+            // Add shake animation to button
+            button.classList.add('shake');
+            setTimeout(() => button.classList.remove('shake'), 500);
+            
+            // Get random fortune (different from last one)
+            let randomIndex;
+            do {
+                randomIndex = Math.floor(Math.random() * fortunes.length);
+            } while (randomIndex === lastFortuneIndex && fortunes.length > 1);
+            
+            lastFortuneIndex = randomIndex;
+            const fortune = fortunes[randomIndex];
+            
+            // Hide result first
+            resultDiv.classList.remove('show');
+            
+            // Change background color
+            document.body.className = '';
+            setTimeout(() => {
+                document.body.classList.add(fortune.className);
+            }, 100);
+            
+            // Update fortune content
+            setTimeout(() => {
+                emojiDiv.textContent = fortune.emoji;
+                textDiv.textContent = fortune.name;
+                adviceDiv.textContent = fortune.advice;
+                
+                // Re-trigger bounce animation
+                emojiDiv.style.animation = 'none';
+                setTimeout(() => {
+                    emojiDiv.style.animation = 'bounce 1s ease';
+                }, 10);
+                
+                // Show result
+                resultDiv.classList.add('show');
+            }, 300);
+        }
+    </script>
+</body>
+</html>
