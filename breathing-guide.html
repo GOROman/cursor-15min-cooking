@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>呼吸ガイド - Breathing Guide</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes breathe {
+            0% {
+                transform: scale(1);
+            }
+            33.33% {
+                transform: scale(1.8);
+            }
+            66.66% {
+                transform: scale(1.8);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+        
+        .breathing-circle {
+            animation: breathe 15s ease-in-out infinite;
+            transition: all 0.3s ease;
+        }
+        
+        /* カスタムグラデーション */
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+    </style>
+</head>
+<body class="h-screen overflow-hidden gradient-bg flex items-center justify-center">
+    <!-- メインコンテナ -->
+    <div class="relative w-full h-full flex flex-col items-center justify-center p-4">
+        <!-- タイトル -->
+        <div class="absolute top-8 text-white text-center">
+            <h1 class="text-2xl md:text-3xl font-light mb-2">🧘‍♀️ 呼吸ガイド</h1>
+            <p class="text-sm md:text-base opacity-75">リラックスして深呼吸しましょう</p>
+        </div>
+        
+        <!-- 呼吸サークル -->
+        <div class="relative">
+            <!-- 外側の装飾的な円 -->
+            <div class="absolute inset-0 w-48 h-48 md:w-64 md:h-64 bg-white/10 rounded-full blur-xl"></div>
+            
+            <!-- メインの呼吸円 -->
+            <div class="breathing-circle relative w-48 h-48 md:w-64 md:h-64 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center border-2 border-white/30 shadow-2xl">
+                <!-- テキスト表示エリア -->
+                <div class="text-center">
+                    <p id="breathText" class="text-2xl md:text-3xl text-white font-light mb-2">吸って...</p>
+                    <p id="breathIcon" class="text-4xl md:text-5xl">🌿</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- コントロールボタン -->
+        <div class="absolute bottom-8 flex gap-4">
+            <button id="pauseBtn" class="px-6 py-3 bg-white/20 hover:bg-white/30 text-white rounded-full backdrop-blur-md transition-all duration-300 flex items-center gap-2">
+                <span id="pauseIcon">⏸</span>
+                <span id="pauseText">一時停止</span>
+            </button>
+            
+            <button id="soundBtn" class="px-6 py-3 bg-white/20 hover:bg-white/30 text-white rounded-full backdrop-blur-md transition-all duration-300 flex items-center gap-2">
+                <span>🔇</span>
+                <span>環境音</span>
+            </button>
+        </div>
+        
+        <!-- プログレスバー -->
+        <div class="absolute bottom-20 w-full max-w-md px-8">
+            <div class="h-2 bg-white/20 rounded-full overflow-hidden">
+                <div id="progressBar" class="h-full bg-white/60 rounded-full transition-all duration-300" style="width: 0%"></div>
+            </div>
+        </div>
+        
+        <!-- インストラクション -->
+        <div class="absolute top-1/2 left-8 transform -translate-y-1/2 text-white/50 text-sm hidden md:block">
+            <p>5秒 吸う</p>
+            <p>5秒 止める</p>
+            <p>5秒 吐く</p>
+        </div>
+    </div>
+    
+    <!-- 環境音（オプション） -->
+    <audio id="ambientSound" loop>
+        <!-- 実際の音源を使用する場合はsrcを追加 -->
+        <!-- <source src="ambient-sound.mp3" type="audio/mpeg"> -->
+    </audio>
+    
+    <script>
+        // 呼吸ガイドのロジック
+        const breathText = document.getElementById('breathText');
+        const breathIcon = document.getElementById('breathIcon');
+        const progressBar = document.getElementById('progressBar');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const pauseIcon = document.getElementById('pauseIcon');
+        const pauseText = document.getElementById('pauseText');
+        const soundBtn = document.getElementById('soundBtn');
+        const ambientSound = document.getElementById('ambientSound');
+        
+        // 呼吸フェーズの定義
+        const phases = [
+            { text: '吸って...', icon: '🌿', duration: 5000 },
+            { text: '止めて...', icon: '🧘‍♀️', duration: 5000 },
+            { text: '吐いて...', icon: '🌊', duration: 5000 }
+        ];
+        
+        let currentPhase = 0;
+        let isPaused = false;
+        let phaseStartTime = Date.now();
+        let pausedTime = 0;
+        let animationFrame;
+        
+        // フェーズを更新する関数
+        function updatePhase() {
+            const phase = phases[currentPhase];
+            breathText.textContent = phase.text;
+            breathIcon.textContent = phase.icon;
+            
+            // フェーズごとに微妙に背景色を変更
+            document.body.className = document.body.className.replace(/gradient-bg-\d/, '') + 
+                                     ` gradient-bg-${currentPhase}`;
+        }
+        
+        // プログレスバーを更新する関数
+        function updateProgress() {
+            if (isPaused) return;
+            
+            const currentTime = Date.now();
+            const elapsedTime = currentTime - phaseStartTime - pausedTime;
+            const phase = phases[currentPhase];
+            const progress = Math.min((elapsedTime / phase.duration) * 100, 100);
+            
+            progressBar.style.width = `${progress}%`;
+            
+            // フェーズが完了したら次へ
+            if (elapsedTime >= phase.duration) {
+                currentPhase = (currentPhase + 1) % phases.length;
+                phaseStartTime = Date.now();
+                pausedTime = 0;
+                updatePhase();
+            }
+            
+            animationFrame = requestAnimationFrame(updateProgress);
+        }
+        
+        // 一時停止/再開の処理
+        pauseBtn.addEventListener('click', () => {
+            isPaused = !isPaused;
+            
+            if (isPaused) {
+                pauseIcon.textContent = '▶';
+                pauseText.textContent = '再開';
+                document.querySelector('.breathing-circle').style.animationPlayState = 'paused';
+                cancelAnimationFrame(animationFrame);
+                pausedTime += Date.now() - phaseStartTime;
+            } else {
+                pauseIcon.textContent = '⏸';
+                pauseText.textContent = '一時停止';
+                document.querySelector('.breathing-circle').style.animationPlayState = 'running';
+                phaseStartTime = Date.now();
+                updateProgress();
+            }
+        });
+        
+        // 環境音の切り替え（実装例）
+        let isSoundOn = false;
+        soundBtn.addEventListener('click', () => {
+            isSoundOn = !isSoundOn;
+            soundBtn.querySelector('span:first-child').textContent = isSoundOn ? '🔊' : '🔇';
+            
+            // 実際の音源がある場合
+            if (ambientSound.src) {
+                if (isSoundOn) {
+                    ambientSound.play().catch(e => console.log('音声再生エラー:', e));
+                } else {
+                    ambientSound.pause();
+                }
+            }
+        });
+        
+        // キーボードショートカット
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                pauseBtn.click();
+            }
+        });
+        
+        // アプリの初期化
+        function init() {
+            updatePhase();
+            updateProgress();
+        }
+        
+        // 開始
+        init();
+        
+        // グラデーションのバリエーション（Tailwindで直接定義できない場合）
+        const style = document.createElement('style');
+        style.textContent = `
+            .gradient-bg-0 { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+            .gradient-bg-1 { background: linear-gradient(135deg, #6B73FF 0%, #000DFF 100%); }
+            .gradient-bg-2 { background: linear-gradient(135deg, #8E2DE2 0%, #4A00E0 100%); }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
